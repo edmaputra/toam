@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20230802_add_category_1
+      author: edmaputra
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: category
+      changes:
+        - createTable:
+            tableName: category
+            columns:
+              - column:
+                  constraint:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: category_pkey
+                  name: id
+                  type: uuid
+                  defaultValueComputed: uid.uuid_generate_v4()
+              - column:
+                  constraint:
+                    nullable: false
+                  name: name
+                  type: ${textColumnType}
+              - column:
+                  name: description
+                  type: ${textColumnType}

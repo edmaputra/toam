@@ -1,0 +1,10 @@
+spring:
+  r2dbc:
+    username: toam
+    password: toam
+    url: r2dbc:postgresql://localhost:5432/toam
+  liquibase:
+    change-log: classpath:db/migration/master.yaml
+    url: jdbc:postgresql://localhost:5432/toam
+    user: toam
+    password: toam

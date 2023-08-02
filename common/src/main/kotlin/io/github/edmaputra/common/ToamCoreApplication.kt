@@ -1,4 +1,4 @@
-package io.github.edmaputra.core
+package io.github.edmaputra.common
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

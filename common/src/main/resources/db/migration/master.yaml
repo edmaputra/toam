@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - property:
+      dbms:
+  - include:
+      file: db/migration/20230802_add_category.yaml

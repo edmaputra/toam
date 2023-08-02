@@ -1,3 +1,3 @@
 rootProject.name = "toam"
 
-include("core")
+include("common")

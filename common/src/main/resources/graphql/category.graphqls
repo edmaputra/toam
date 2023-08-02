@@ -1,0 +1,21 @@
+type Category {
+    id: ID!,
+    name: String!,
+    description: String
+}
+
+type Query {
+    categoriesTest: [Category]
+    categories(search: String): Category
+    categoriesPaginated(first: Int, after: String, last: Int, before: String): Category
+    category(id: ID): Category
+}
+
+input CategoryInput {
+    name: String!,
+    description: String
+}
+
+type Mutation {
+    create(input: CategoryInput): Category
+}

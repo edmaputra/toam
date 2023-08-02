@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  postgre:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=toam
+      - POSTGRES_USER=toam
+      - POSTGRES_PASSWORD=toam
