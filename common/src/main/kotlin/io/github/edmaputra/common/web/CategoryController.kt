@@ -14,8 +14,14 @@ import reactor.core.publisher.Mono
 class CategoryController(private val service: CategoryService) {
 
   @QueryMapping
-  fun categories(@Argument("search") keyword: String?): Flux<Category> {
-    return service.findAll(keyword)
+  fun categories(
+    @Argument("page") page: Long?,
+    @Argument("size") size: Int?,
+    @Argument("sortBy") sortBy: String?,
+    @Argument("isAsc") isAsc: Boolean?,
+    @Argument("search") keyword: String?
+  ): Flux<Category> {
+    return service.findAll(page, size, sortBy, isAsc, keyword)
   }
 
   @MutationMapping

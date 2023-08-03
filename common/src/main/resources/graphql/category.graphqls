@@ -5,8 +5,7 @@ type Category {
 }
 
 type Query {
-    categories(search: String): [Category]
-    categoriesPaginated(first: Int, after: String, last: Int, before: String): Category
+    categories(page: Int, size: Int, sortBy: String, isAsc: Boolean, search: String): [Category]
     category(id: ID): Category
 }
 

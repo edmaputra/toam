@@ -60,7 +60,7 @@ class CategoryTest {
   }
 
   @Test
-  fun getAllCategories() {
+  fun `given valid request, when submit, then return all list with expected field`() {
     val categories = doSubmitRequest(
       "{ categories { name }}"
     )
@@ -88,6 +88,58 @@ class CategoryTest {
         """.trimIndent(),
       Tuple.tuple("dessert", "the dessert category")
     )
+  }
+
+  @Test
+  fun `given get request with pagination, when submit, then return filtered list`() {
+    doSubmitAndAssert(
+      """
+           {
+            categories(page: 0, size: 1, sortBy: "name") {
+                name, description
+            }
+           }
+        """.trimIndent(),
+      Tuple.tuple("drink", "the drink category really good"),
+    )
+
+    doSubmitAndAssert(
+      """
+           {
+            categories(page: 0, size: 1, sortBy: "name", isAsc: true) {
+                name, description
+            }
+           }
+        """.trimIndent(),
+      Tuple.tuple("beverages", "the beverages category")
+    )
+
+    doSubmitAndAssert(
+      """
+           {
+            categories(page: 0, size: 2, sortBy: "name", isAsc: true) {
+                name, description
+            }
+           }
+        """.trimIndent(),
+      Tuple.tuple("beverages", "the beverages category"),
+      Tuple.tuple("dessert", "the dessert category"),
+    )
+
+    doSubmitAndAssert(
+      """
+           {
+            categories(page: 1, size: 2, sortBy: "name", isAsc: true) {
+                name, description
+            }
+           }
+        """.trimIndent(),
+      Tuple.tuple("drink", "the drink category really good")
+    )
+  }
+
+  @Test
+  fun `given get request with pagination and search, when submit, then return filtered list`() {
   }
 
   fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {

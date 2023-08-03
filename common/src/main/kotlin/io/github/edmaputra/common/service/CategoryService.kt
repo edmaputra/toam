@@ -1,31 +1,22 @@
 package io.github.edmaputra.common.service
 
 import io.github.edmaputra.common.entity.Category
-import io.github.edmaputra.common.repository.CategoryRepository
-import org.springframework.data.domain.Example
-import org.springframework.data.domain.ExampleMatcher
+import io.github.edmaputra.common.repository.CategoryTemplateRepository
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface CategoryService {
 
-  fun findAll(search: String?): Flux<Category>
+  fun findAll(page: Long?, size: Int?, sortBy: String?, isAsc: Boolean?, search: String?): Flux<Category>
   fun find(id: String): Mono<Category>
 }
 
 @Service
-class CategoryServiceImpl(private val repository: CategoryRepository) : CategoryService {
+class CategoryServiceImpl(private val repository: CategoryTemplateRepository) : CategoryService {
 
-  override fun findAll(search: String?): Flux<Category> {
-    return repository.findAll(
-      Example.of(
-        Category(null, search.orEmpty(), search.orEmpty()),
-        ExampleMatcher.matchingAny()
-          .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
-          .withMatcher("description", ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
-      )
-    )
+  override fun findAll(page: Long?, size: Int?, sortBy: String?, isAsc: Boolean?, search: String?): Flux<Category> {
+    return repository.findAll(page, size, sortBy, isAsc, search)
   }
 
   override fun find(id: String): Mono<Category> {
