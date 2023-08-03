@@ -1,3 +1,11 @@
 package io.github.edmaputra.common.entity
 
-data class Category(val id: String, val name: String, val description: String? = "")
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
+
+@Table
+data class Category(
+  @Id val id: String?,
+  val name: String,
+  val description: String? = ""
+)

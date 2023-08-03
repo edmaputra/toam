@@ -7,10 +7,10 @@ trim_trailing_whitespace = true
 charset = utf-8
 indent_style = space
 
-[**/pom.xml]
-indent_size = 4
-
 [*.java]
+indent_size = 2
+
+[**.kt]
 indent_size = 2
 
 [**.kts]

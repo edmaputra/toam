@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ToamApplication
+class ToamCommonApplication
 
 fun main(args: Array<String>) {
-	runApplication<ToamApplication>(*args)
+  runApplication<ToamCommonApplication>(*args)
 }

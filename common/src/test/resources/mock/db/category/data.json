@@ -1,0 +1,14 @@
+[
+  {
+    "name": "beverages",
+    "description": "the beverages category"
+  },
+  {
+    "name": "dessert",
+    "description": "the dessert category"
+  },
+  {
+    "name": "drink",
+    "description": "the drink category"
+  }
+]
