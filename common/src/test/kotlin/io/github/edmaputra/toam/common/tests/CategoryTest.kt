@@ -61,46 +61,48 @@ class CategoryTest {
 
   @Test
   fun getAllCategories() {
-    var query = """
-           {
-            categories {
-                name
-            }
-           }
-        """.trimIndent()
-
-    var categories = HttpGraphQlTester.create(webClient)
-      .document(query)
-      .execute()
-      .path("categories")
-      .entityList(Category::class.java)
-      .get()
-
+    val categories = doSubmitRequest(
+      "{ categories { name }}"
+    )
     assertThat(categories)
       .extracting("name")
       .containsExactlyInAnyOrder("dessert", "drink", "beverages")
 
-    query = """
+    doSubmitAndAssert(
+      "{ categories { name, description }}",
+      Tuple.tuple("dessert", "the dessert category"),
+      Tuple.tuple("drink", "the drink category really good"),
+      Tuple.tuple("beverages", "the beverages category")
+    )
+  }
+
+  @Test
+  fun `given get request with search, when submit, then return filtered list`() {
+    doSubmitAndAssert(
+      """
            {
-            categories {
+            categories(search: "dessert") {
                 name, description
             }
            }
-        """.trimIndent()
+        """.trimIndent(),
+      Tuple.tuple("dessert", "the dessert category")
+    )
+  }
 
-    categories = HttpGraphQlTester.create(webClient)
+  fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {
+    val resultList = doSubmitRequest(query)
+    assertThat(resultList)
+      .extracting("name", "description")
+      .containsExactlyInAnyOrder(*tuples)
+  }
+
+  fun doSubmitRequest(query: String): MutableList<Category> {
+    return HttpGraphQlTester.create(webClient)
       .document(query)
       .execute()
       .path("categories")
       .entityList(Category::class.java)
       .get()
-
-    assertThat(categories)
-      .extracting("name", "description")
-      .containsExactlyInAnyOrder(
-        Tuple.tuple("dessert", "the dessert category"),
-        Tuple.tuple("drink", "the drink category"),
-        Tuple.tuple("beverages", "the beverages category")
-      )
   }
 }

@@ -27,9 +27,12 @@ dependencies {
   implementation("org.liquibase:liquibase-core")
 
   compileOnly("org.projectlombok:lombok")
+
   runtimeOnly("org.postgresql:postgresql")
   runtimeOnly("org.postgresql:r2dbc-postgresql")
+
   annotationProcessor("org.projectlombok:lombok")
+
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("org.springframework.graphql:spring-graphql-test")
