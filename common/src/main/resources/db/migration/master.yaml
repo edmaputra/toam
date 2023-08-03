@@ -1,5 +1,7 @@
 databaseChangeLog:
   - property:
-      dbms:
+      dbms: postgresql
+      name: textColumnType
+      value: VARCHAR(100)
   - include:
       file: db/migration/20230802_add_category.yaml

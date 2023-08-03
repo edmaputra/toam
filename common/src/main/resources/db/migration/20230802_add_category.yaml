@@ -12,15 +12,15 @@ databaseChangeLog:
             tableName: category
             columns:
               - column:
-                  constraint:
+                  constraints:
                     nullable: false
                     primaryKey: true
                     primaryKeyName: category_pkey
                   name: id
                   type: uuid
-                  defaultValueComputed: uid.uuid_generate_v4()
+                  defaultValueComputed: gen_random_uuid()
               - column:
-                  constraint:
+                  constraints:
                     nullable: false
                   name: name
                   type: ${textColumnType}
