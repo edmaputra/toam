@@ -140,6 +140,17 @@ class CategoryTest {
 
   @Test
   fun `given get request with pagination and search, when submit, then return filtered list`() {
+    doSubmitAndAssert(
+      """
+           {
+            categories(search: "the d", page: 0, size: 1, sortBy: "name", isAsc: true) {
+                name, description
+            }
+           }
+        """.trimIndent(),
+      Tuple.tuple("dessert", "the dessert category"),
+//      Tuple.tuple("drink", "the drink category really good")
+    )
   }
 
   fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {
