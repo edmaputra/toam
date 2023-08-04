@@ -7,9 +7,12 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.CriteriaDefinition
 import org.springframework.data.relational.core.query.Query
+import org.springframework.data.relational.core.query.isEqual
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.*
+
 
 interface CategoryTemplateRepository {
   fun findAll(page: Long?, size: Int?, sortBy: String?, isAsc: Boolean?, keyWords: String?): Flux<Category>
@@ -23,11 +26,13 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
     val pageable = PageRequest.of((page ?: 0).toInt(), size ?: 10)
       .withSort(constructSort(sortBy, isAsc))
 
+    val query = Query
+      .query(constructCriteria(keyWords))
+      .with(pageable)
+
     return template.select(Category::class.java)
       .matching(
-        Query
-          .query(constructCriteria(keyWords))
-          .with(pageable)
+        query
       ).all()
   }
 
@@ -36,8 +41,8 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
       return CriteriaDefinition.empty()
     }
 
-    return where("name").like(keyWords)
-      .or(where("description").like(keyWords))
+    return where("name").like("%$keyWords%")
+      .or(where("description").like("%$keyWords%"))
   }
 
   fun constructSort(sortBy: String?, isAsc: Boolean?): Sort {
@@ -51,6 +56,6 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
   }
 
   override fun findById(id: String): Mono<Category> {
-    return template.selectOne(Query.query(where("id").like(id)), Category::class.java)
+    return template.selectOne(Query.query(where("id").isEqual(UUID.fromString(id))), Category::class.java)
   }
 }

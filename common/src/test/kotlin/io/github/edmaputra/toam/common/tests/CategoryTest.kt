@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.graphql.test.tester.HttpGraphQlTester
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.util.stream.Collectors
 
 @SpringBootTest(
   classes = [ToamCommonApplication::class],
@@ -149,8 +150,33 @@ class CategoryTest {
            }
         """.trimIndent(),
       Tuple.tuple("dessert", "the dessert category"),
-//      Tuple.tuple("drink", "the drink category really good")
+      // todo: the following category should be fetched with this kind of filtering
+      // Tuple.tuple("drink", "the drink category really good")
     )
+  }
+
+  @Test
+  fun `given valid id, when submit by id, then return one expected category`() {
+    val beverages = repository.findAll().collectList().block()
+      ?.stream()
+      ?.sorted(Comparator.comparing { it.name })
+      ?.collect(Collectors.toList())
+      ?.get(0)
+
+    val query = """
+           {
+            category(id: "${beverages?.id}") {
+                id, name, description
+            }
+           }
+        """.trimIndent()
+
+    HttpGraphQlTester.create(webClient)
+      .document(query)
+      .execute()
+      .path("category.id").entity(String::class.java).isEqualTo(beverages?.id.toString())
+      .path("category.name").entity(String::class.java).isEqualTo("beverages")
+      .path("category.description").entity(String::class.java).isEqualTo("the beverages category")
   }
 
   fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {
@@ -160,12 +186,12 @@ class CategoryTest {
       .containsExactlyInAnyOrder(*tuples)
   }
 
-  fun doSubmitRequest(query: String): MutableList<Category> {
-    return HttpGraphQlTester.create(webClient)
+  fun doSubmitRequest(query: String): MutableList<Category> =
+    HttpGraphQlTester.create(webClient)
       .document(query)
       .execute()
       .path("categories")
       .entityList(Category::class.java)
       .get()
-  }
+
 }

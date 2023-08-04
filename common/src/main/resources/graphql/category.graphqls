@@ -1,12 +1,12 @@
 type Category {
-    id: ID!,
+    id: String!,
     name: String!,
     description: String
 }
 
 type Query {
     categories(page: Int, size: Int, sortBy: String, isAsc: Boolean, search: String): [Category]
-    category(id: ID): Category
+    category(id: String!): Category
 }
 
 input CategoryInput {

@@ -24,6 +24,9 @@ class CategoryController(private val service: CategoryService) {
     return service.findAll(page, size, sortBy, isAsc, keyword)
   }
 
+  @QueryMapping
+  fun category(@Argument id: String): Mono<Category> = service.find(id)
+
   @MutationMapping
   fun create(@Argument("input") input: CategoryInput): Mono<Category> {
     return Mono.empty()
