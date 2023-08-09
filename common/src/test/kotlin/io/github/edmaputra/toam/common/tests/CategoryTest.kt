@@ -144,14 +144,13 @@ class CategoryTest {
     doSubmitAndAssert(
       """
            {
-            categories(search: "the d", page: 0, size: 1, sortBy: "name", isAsc: true) {
+            categories(search: "the d", page: 0, size: 2, sortBy: "name", isAsc: true) {
                 name, description
             }
            }
         """.trimIndent(),
       Tuple.tuple("dessert", "the dessert category"),
-      // todo: the following category should be fetched with this kind of filtering
-      // Tuple.tuple("drink", "the drink category really good")
+      Tuple.tuple("drink", "the drink category really good")
     )
   }
 

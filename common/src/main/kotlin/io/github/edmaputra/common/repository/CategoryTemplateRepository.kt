@@ -31,9 +31,8 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
       .with(pageable)
 
     return template.select(Category::class.java)
-      .matching(
-        query
-      ).all()
+      .matching(query)
+      .all()
   }
 
   fun constructCriteria(keyWords: String?): CriteriaDefinition {
