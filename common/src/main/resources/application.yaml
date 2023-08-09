@@ -8,10 +8,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/toam
     user: toam
     password: toam
-
 logging:
   level:
     org:
       springframework:
         data:
           r2dbc: DEBUG
+server:
+  port: 10000

@@ -179,6 +179,26 @@ class CategoryTest {
       .path("category.description").entity(String::class.java).isEqualTo("the beverages category")
   }
 
+  @Test
+  fun `given valid create request, when submit for create, then category data is correctly created`() {
+    val createMutation = """
+      mutation {
+        createCategory(input: {
+          name: "test", description: "test category"
+          }) {
+            id, name, description
+        }
+      }
+    """.trimIndent()
+
+    HttpGraphQlTester.create(webClient)
+      .document(createMutation)
+      .execute()
+      .path("createCategory.id").entity(String::class.java).matches { it.matches(Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")) }
+      .path("createCategory.name").entity(String::class.java).isEqualTo("test")
+      .path("createCategory.description").entity(String::class.java).isEqualTo("test category")
+  }
+
   fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {
     val resultList = doSubmitRequest(query)
     assertThat(resultList)

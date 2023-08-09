@@ -1,12 +1,13 @@
 package io.github.edmaputra.common.entity
 
+import jakarta.validation.constraints.NotBlank
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
-import java.util.UUID
+import java.util.*
 
 @Table
 data class Category(
   @Id val id: UUID?,
-  val name: String,
+  @field:NotBlank(message = "Name must not be blank") val name: String,
   val description: String? = ""
 )
