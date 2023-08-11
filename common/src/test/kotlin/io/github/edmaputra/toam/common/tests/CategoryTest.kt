@@ -2,8 +2,11 @@ package io.github.edmaputra.toam.common.tests
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import graphql.ErrorType
 import io.github.edmaputra.common.ToamCommonApplication
+import io.github.edmaputra.common.VALIDATION_ERRORS
 import io.github.edmaputra.common.entity.Category
+import io.github.edmaputra.common.error.ValidationError
 import io.github.edmaputra.common.repository.CategoryRepository
 import io.github.edmaputra.toam.common.helper.TestHelper
 import org.assertj.core.api.Assertions.assertThat
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.graphql.ResponseError
 import org.springframework.graphql.test.tester.HttpGraphQlTester
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.util.stream.Collectors
@@ -194,9 +198,44 @@ class CategoryTest {
     HttpGraphQlTester.create(webClient)
       .document(createMutation)
       .execute()
-      .path("createCategory.id").entity(String::class.java).matches { it.matches(Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")) }
+      .path("createCategory.id").entity(String::class.java)
+      .matches { it.matches(Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")) }
       .path("createCategory.name").entity(String::class.java).isEqualTo("test")
       .path("createCategory.description").entity(String::class.java).isEqualTo("test category")
+  }
+
+
+  @Test
+  fun `given invalid create request, when submit for create, then response error with expected message`() {
+    val createMutation = """
+      mutation {
+        createCategory(input: {
+          name: "", description: "test category"
+          }) {
+            id, name, description
+        }
+      }
+    """.trimIndent()
+
+    HttpGraphQlTester.create(webClient)
+      .document(createMutation)
+      .execute()
+      .errors()
+      .satisfy { err ->
+        assertThat(err)
+          .extracting(ResponseError::getErrorType)
+          .contains(Tuple.tuple(ErrorType.ValidationError))
+
+        assertThat(
+          err.stream()
+            .map { it.extensions[VALIDATION_ERRORS] as List<*> }
+            .map { it.filterIsInstance<LinkedHashMap<String, String>>() }
+            .flatMap { it.stream() }
+            .map { objectMapper.convertValue(it, ValidationError::class.java) }
+            .collect(Collectors.toList())
+        ).extracting(ValidationError::field, ValidationError::message)
+          .containsExactlyInAnyOrder(Tuple.tuple("name", "must not be blank"))
+      }
   }
 
   fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {
