@@ -17,6 +17,7 @@ import java.util.*
 interface CategoryTemplateRepository {
   fun findAll(page: Long?, size: Int?, sortBy: String?, isAsc: Boolean?, keyWords: String?): Flux<Category>
   fun findById(id: String): Mono<Category>
+  fun save(category: Category): Mono<Category>
 }
 
 @Component
@@ -35,6 +36,12 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
       .all()
   }
 
+  override fun findById(id: String) =
+    template.selectOne(Query.query(where("id").isEqual(UUID.fromString(id))), Category::class.java)
+
+  override fun save(category: Category) = template.insert(category)
+
+
   fun constructCriteria(keyWords: String?): CriteriaDefinition {
     if (keyWords == null) {
       return CriteriaDefinition.empty()
@@ -52,9 +59,5 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
     }
 
     return Sort.by(if (temp) Sort.Direction.ASC else Sort.Direction.DESC, sortBy)
-  }
-
-  override fun findById(id: String): Mono<Category> {
-    return template.selectOne(Query.query(where("id").isEqual(UUID.fromString(id))), Category::class.java)
   }
 }

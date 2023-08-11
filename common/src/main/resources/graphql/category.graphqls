@@ -15,5 +15,5 @@ input CategoryInput {
 }
 
 type Mutation {
-    create(input: CategoryInput): Category
+    createCategory(input: CategoryInput): Category
 }
