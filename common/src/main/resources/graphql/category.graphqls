@@ -16,4 +16,5 @@ input CategoryInput {
 
 type Mutation {
     createCategory(input: CategoryInput): Category
+    deleteCategory(id: String!): Category
 }

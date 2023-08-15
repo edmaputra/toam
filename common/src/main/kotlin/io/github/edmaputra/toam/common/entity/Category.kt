@@ -1,4 +1,4 @@
-package io.github.edmaputra.common.entity
+package io.github.edmaputra.toam.common.entity
 
 import jakarta.validation.constraints.NotBlank
 import org.springframework.data.annotation.Id

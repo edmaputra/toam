@@ -1,6 +1,6 @@
-package io.github.edmaputra.common.repository
+package io.github.edmaputra.toam.common.repository
 
-import io.github.edmaputra.common.entity.Category
+import io.github.edmaputra.toam.common.entity.Category
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate

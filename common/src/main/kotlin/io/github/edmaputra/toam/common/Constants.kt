@@ -1,3 +1,3 @@
-package io.github.edmaputra.common
+package io.github.edmaputra.toam.common
 
 const val VALIDATION_ERRORS = "validationErrors"

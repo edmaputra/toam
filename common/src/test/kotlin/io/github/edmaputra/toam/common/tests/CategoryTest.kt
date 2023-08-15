@@ -3,11 +3,11 @@ package io.github.edmaputra.toam.common.tests
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.ErrorType
-import io.github.edmaputra.common.ToamCommonApplication
-import io.github.edmaputra.common.VALIDATION_ERRORS
-import io.github.edmaputra.common.entity.Category
-import io.github.edmaputra.common.error.ValidationError
-import io.github.edmaputra.common.repository.CategoryRepository
+import io.github.edmaputra.toam.common.ToamCommonApplication
+import io.github.edmaputra.toam.common.VALIDATION_ERRORS
+import io.github.edmaputra.toam.common.entity.Category
+import io.github.edmaputra.toam.common.error.ValidationError
+import io.github.edmaputra.toam.common.repository.CategoryRepository
 import io.github.edmaputra.toam.common.helper.TestHelper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple

@@ -1,4 +1,4 @@
-package io.github.edmaputra.common.error
+package io.github.edmaputra.toam.common.error
 
 data class ValidationError(
     val field: String,

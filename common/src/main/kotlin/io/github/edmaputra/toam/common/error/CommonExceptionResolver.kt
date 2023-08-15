@@ -1,10 +1,10 @@
-package io.github.edmaputra.common.error
+package io.github.edmaputra.toam.common.error
 
 import graphql.ErrorType
 import graphql.GraphQLError
 import graphql.GraphqlErrorBuilder
 import graphql.schema.DataFetchingEnvironment
-import io.github.edmaputra.common.VALIDATION_ERRORS
+import io.github.edmaputra.toam.common.VALIDATION_ERRORS
 import jakarta.validation.ConstraintViolationException
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter
 import org.springframework.stereotype.Component
