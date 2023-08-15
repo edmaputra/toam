@@ -5,3 +5,5 @@ databaseChangeLog:
       value: VARCHAR(100)
   - include:
       file: db/migration/20230802_add_category.yaml
+  - include:
+      file: db/migration/20230815_category_add_field_deletedFlag.yaml

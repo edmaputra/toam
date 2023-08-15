@@ -1,4 +1,4 @@
-package io.github.edmaputra.common.web.request
+package io.github.edmaputra.toam.common.web.request
 
 import jakarta.validation.constraints.NotBlank
 

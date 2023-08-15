@@ -1,10 +1,11 @@
-package io.github.edmaputra.common.error
+package io.github.edmaputra.toam.common.error
 
 import graphql.ErrorType
 import graphql.GraphQLError
 import graphql.GraphqlErrorBuilder
 import graphql.schema.DataFetchingEnvironment
-import io.github.edmaputra.common.VALIDATION_ERRORS
+import io.github.edmaputra.toam.common.VALIDATION_ERRORS
+import io.github.edmaputra.toam.core.error.EntityNotFoundException
 import jakarta.validation.ConstraintViolationException
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter
 import org.springframework.stereotype.Component
@@ -26,6 +27,13 @@ class CommonExceptionResolver : DataFetcherExceptionResolverAdapter() {
                 .location(env.field.sourceLocation)
                 .extensions(mapOf(VALIDATION_ERRORS to messages))
                 .build()
+        } else if (ex is EntityNotFoundException) {
+          return GraphqlErrorBuilder.newError()
+            .errorType(ErrorType.DataFetchingException)
+            .message(ex.message)
+            .path(env.executionStepInfo.path)
+            .location(env.field.sourceLocation)
+            .build()
         }
         return super.resolveToSingleError(ex, env)
     }

@@ -3,12 +3,12 @@ package io.github.edmaputra.toam.common.tests
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.ErrorType
-import io.github.edmaputra.common.ToamCommonApplication
-import io.github.edmaputra.common.VALIDATION_ERRORS
-import io.github.edmaputra.common.entity.Category
-import io.github.edmaputra.common.error.ValidationError
-import io.github.edmaputra.common.repository.CategoryRepository
+import io.github.edmaputra.toam.common.ToamCommonApplication
+import io.github.edmaputra.toam.common.VALIDATION_ERRORS
+import io.github.edmaputra.toam.common.entity.Category
+import io.github.edmaputra.toam.common.error.ValidationError
 import io.github.edmaputra.toam.common.helper.TestHelper
+import io.github.edmaputra.toam.common.repository.CategoryRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.AfterEach
@@ -21,7 +21,8 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.graphql.ResponseError
 import org.springframework.graphql.test.tester.HttpGraphQlTester
 import org.springframework.test.web.reactive.server.WebTestClient
-import java.util.stream.Collectors
+import java.util.*
+import java.util.stream.*
 
 @SpringBootTest(
   classes = [ToamCommonApplication::class],
@@ -183,6 +184,35 @@ class CategoryTest {
   }
 
   @Test
+  fun `given unexist id, when submit by id, then expect not found`() {
+    val randomId = UUID.randomUUID().toString()
+
+    val query = """
+           {
+            category(id: "$randomId") {
+                id, name, description
+            }
+           }
+        """.trimIndent()
+
+    HttpGraphQlTester.create(webClient)
+      .document(query)
+      .execute()
+      .errors()
+      .satisfy { err ->
+        assertThat(err)
+          .extracting(ResponseError::getErrorType)
+          .contains(Tuple.tuple(ErrorType.DataFetchingException))
+
+        assertThat(
+          err.stream()
+            .map { it.message }
+            .collect(Collectors.toList())
+        ).containsExactlyInAnyOrder("Data not exists. Id: $randomId")
+      }
+  }
+
+  @Test
   fun `given valid create request, when submit for create, then category data is correctly created`() {
     val createMutation = """
       mutation {
@@ -234,6 +264,67 @@ class CategoryTest {
             .collect(Collectors.toList())
         ).extracting(ValidationError::field, ValidationError::message)
           .containsExactlyInAnyOrder(Tuple.tuple("name", "must not be blank"))
+      }
+  }
+
+  @Test
+  fun `given valid delete request, when delete, then return deleted category`() {
+    val beverages = repository.findAll().collectList().block()
+      ?.stream()
+      ?.sorted(Comparator.comparing { it.name })
+      ?.collect(Collectors.toList())
+      ?.get(0)
+
+    val query = """
+           mutation{
+            deleteCategory(id: "${beverages?.id}") {
+                id, name, description
+            }
+           }
+        """.trimIndent()
+
+    HttpGraphQlTester.create(webClient)
+      .document(query)
+      .execute()
+      .path("deleteCategory.id").entity(String::class.java).isEqualTo(beverages?.id.toString())
+      .path("deleteCategory.name").entity(String::class.java).isEqualTo("beverages")
+      .path("deleteCategory.description").entity(String::class.java).isEqualTo("the beverages category")
+
+    val beverage = repository.findAll().collectList().block()
+      ?.stream()
+      ?.filter { it.name.equals("beverages", true) }
+      ?.findFirst()
+
+    assertThat(beverage).isNotNull
+    assertThat(beverage?.get()?.deletedFlag).isTrue
+  }
+
+  @Test
+  fun `given unexist id, when delete by id, then expect not found`() {
+    val randomId = UUID.randomUUID().toString()
+
+    val query = """
+           mutation{
+            deleteCategory(id: "$randomId") {
+                id, name, description
+            }
+           }
+        """.trimIndent()
+
+    HttpGraphQlTester.create(webClient)
+      .document(query)
+      .execute()
+      .errors()
+      .satisfy { err ->
+        assertThat(err)
+          .extracting(ResponseError::getErrorType)
+          .contains(Tuple.tuple(ErrorType.DataFetchingException))
+
+        assertThat(
+          err.stream()
+            .map { it.message }
+            .collect(Collectors.toList())
+        ).containsExactlyInAnyOrder("Data not exists. Id: $randomId")
       }
   }
 

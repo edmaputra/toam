@@ -15,6 +15,8 @@ configurations {
 }
 
 dependencies {
+  implementation(project(":core"))
+
   implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-graphql")

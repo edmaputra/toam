@@ -1,8 +1,8 @@
-package io.github.edmaputra.common.web
+package io.github.edmaputra.toam.common.web
 
-import io.github.edmaputra.common.entity.Category
-import io.github.edmaputra.common.service.CategoryService
-import io.github.edmaputra.common.web.request.CategoryCreateInput
+import io.github.edmaputra.toam.common.entity.Category
+import io.github.edmaputra.toam.common.service.CategoryService
+import io.github.edmaputra.toam.common.web.request.CategoryCreateInput
 import jakarta.validation.Valid
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
@@ -31,5 +31,10 @@ class CategoryController(private val service: CategoryService) {
   @MutationMapping("createCategory")
   fun createCategory(@Argument @Valid input: CategoryCreateInput): Mono<Category> {
     return service.create(input)
+  }
+
+  @MutationMapping()
+  fun deleteCategory(@Argument id: String): Mono<Category> {
+    return service.delete(id)
   }
 }
