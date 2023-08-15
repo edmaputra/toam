@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20230815_category_add_field_deletedFlag
+      author: edmaputra
+      changes:
+        - addColumn:
+            tableName: category
+            columns:
+              - column:
+                  name: deleted_flag
+                  type: boolean

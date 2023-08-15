@@ -31,7 +31,5 @@ class CategoryServiceImpl(private val repository: CategoryTemplateRepository) : 
     return repository.save(category)
   }
 
-  override fun delete(id: String): Mono<Category> {
-    TODO("Not yet implemented")
-  }
+  override fun delete(id: String) = repository.delete(id)
 }
