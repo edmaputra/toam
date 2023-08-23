@@ -11,9 +11,9 @@ data class Category(
   val id: UUID?,
 
   @field:NotBlank(message = "Name must not be blank")
-  val name: String,
+  var name: String,
 
-  val description: String? = "",
+  var description: String? = "",
 
   val deletedFlag: Boolean = false
 )
