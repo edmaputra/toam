@@ -3,6 +3,7 @@ package io.github.edmaputra.toam.common.web
 import io.github.edmaputra.toam.common.entity.Category
 import io.github.edmaputra.toam.common.service.CategoryService
 import io.github.edmaputra.toam.common.web.request.CategoryCreateInput
+import io.github.edmaputra.toam.common.web.request.CategoryUpdateInput
 import jakarta.validation.Valid
 import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.graphql.data.method.annotation.MutationMapping
@@ -31,6 +32,11 @@ class CategoryController(private val service: CategoryService) {
   @MutationMapping("createCategory")
   fun createCategory(@Argument @Valid input: CategoryCreateInput): Mono<Category> {
     return service.create(input)
+  }
+
+  @MutationMapping("updateCategory")
+  fun updateCategory(@Argument @Valid input: CategoryUpdateInput): Mono<Category> {
+    return service.update(input)
   }
 
   @MutationMapping()

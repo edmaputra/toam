@@ -22,7 +22,7 @@ import org.springframework.graphql.ResponseError
 import org.springframework.graphql.test.tester.HttpGraphQlTester
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.util.*
-import java.util.stream.*
+import java.util.stream.Collectors
 
 @SpringBootTest(
   classes = [ToamCommonApplication::class],
@@ -67,7 +67,7 @@ class CategoryTest {
 
   @Test
   fun `given valid request, when submit, then return all list with expected field`() {
-    val categories = doSubmitRequest(
+    val categories = doSubmitRequestAndReturnList(
       "{ categories { name }}"
     )
     assertThat(categories)
@@ -161,11 +161,7 @@ class CategoryTest {
 
   @Test
   fun `given valid id, when submit by id, then return one expected category`() {
-    val beverages = repository.findAll().collectList().block()
-      ?.stream()
-      ?.sorted(Comparator.comparing { it.name })
-      ?.collect(Collectors.toList())
-      ?.get(0)
+    val beverages = getBeverages()
 
     val query = """
            {
@@ -184,7 +180,7 @@ class CategoryTest {
   }
 
   @Test
-  fun `given unexist id, when submit by id, then expect not found`() {
+  fun `given random id, when submit by id, then expect not found`() {
     val randomId = UUID.randomUUID().toString()
 
     val query = """
@@ -224,15 +220,12 @@ class CategoryTest {
       }
     """.trimIndent()
 
-    HttpGraphQlTester.create(webClient)
-      .document(createMutation)
-      .execute()
+    doSubmitRequest(createMutation)
       .path("createCategory.id").entity(String::class.java)
       .matches { it.matches(Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")) }
       .path("createCategory.name").entity(String::class.java).isEqualTo("test")
       .path("createCategory.description").entity(String::class.java).isEqualTo("test category")
   }
-
 
   @Test
   fun `given invalid create request, when submit for create, then response error with expected message`() {
@@ -246,34 +239,83 @@ class CategoryTest {
       }
     """.trimIndent()
 
-    HttpGraphQlTester.create(webClient)
-      .document(createMutation)
-      .execute()
+    doSubmitRequest(createMutation)
       .errors()
       .satisfy { err ->
-        assertThat(err)
-          .extracting(ResponseError::getErrorType)
-          .contains(Tuple.tuple(ErrorType.ValidationError))
+        assertValidationError(
+          err,
+          Tuple.tuple("name", "must not be blank")
+        )
+      }
+  }
 
-        assertThat(
-          err.stream()
-            .map { it.extensions[VALIDATION_ERRORS] as List<*> }
-            .map { it.filterIsInstance<LinkedHashMap<String, String>>() }
-            .flatMap { it.stream() }
-            .map { objectMapper.convertValue(it, ValidationError::class.java) }
-            .collect(Collectors.toList())
-        ).extracting(ValidationError::field, ValidationError::message)
-          .containsExactlyInAnyOrder(Tuple.tuple("name", "must not be blank"))
+  @Test
+  fun `given valid update request, when update, then expect updated one`() {
+    val beverages = getBeverages()
+
+    val updateMutation = """
+      mutation {
+        updateCategory(input: {
+          id: "${beverages?.id}", name: "Beverage Fresh", description: "test fresh beverages category"
+          }) {
+            id, name, description
+        }
+      }
+    """.trimIndent()
+
+    doSubmitRequest(updateMutation)
+      .path("updateCategory.id").entity(String::class.java).isEqualTo(beverages?.id.toString())
+      .path("updateCategory.name").entity(String::class.java).isEqualTo("Beverage Fresh")
+      .path("updateCategory.description").entity(String::class.java).isEqualTo("test fresh beverages category")
+  }
+
+  @Test
+  fun `given random id, when update by id, then expect not found`() {
+    val randomId = UUID.randomUUID().toString()
+
+    val query = """
+           mutation{
+            updateCategory(input: {
+          id: "$randomId", name: "Beverage Fresh", description: "test fresh beverages category"
+          }) {
+                id, name, description
+            }
+           }
+        """.trimIndent()
+
+    doSubmitRequest(query)
+      .errors()
+      .satisfy { err ->
+        assertNotFound(err, randomId)
+      }
+  }
+
+  @Test
+  fun `given invalid update request, when submit for update, then response error with expected message`() {
+    val createMutation = """
+      mutation {
+        updateCategory(input: {
+          id: "", name: "", description: "test category"
+          }) {
+            id, name, description
+        }
+      }
+    """.trimIndent()
+
+    doSubmitRequest(createMutation)
+      .errors()
+      .satisfy { err ->
+        assertValidationError(
+          err,
+          Tuple.tuple("id", "must not be blank"),
+          Tuple.tuple("name", "must not be blank")
+        )
       }
   }
 
   @Test
   fun `given valid delete request, when delete, then return deleted category`() {
-    val beverages = repository.findAll().collectList().block()
-      ?.stream()
-      ?.sorted(Comparator.comparing { it.name })
-      ?.collect(Collectors.toList())
-      ?.get(0)
+    val beverages = getBeverages()
 
     val query = """
            mutation{
@@ -283,9 +325,7 @@ class CategoryTest {
            }
         """.trimIndent()
 
-    HttpGraphQlTester.create(webClient)
-      .document(query)
-      .execute()
+    doSubmitRequest(query)
       .path("deleteCategory.id").entity(String::class.java).isEqualTo(beverages?.id.toString())
       .path("deleteCategory.name").entity(String::class.java).isEqualTo("beverages")
       .path("deleteCategory.description").entity(String::class.java).isEqualTo("the beverages category")
@@ -300,7 +340,7 @@ class CategoryTest {
   }
 
   @Test
-  fun `given unexist id, when delete by id, then expect not found`() {
+  fun `given random id, when delete by id, then expect not found`() {
     val randomId = UUID.randomUUID().toString()
 
     val query = """
@@ -311,36 +351,68 @@ class CategoryTest {
            }
         """.trimIndent()
 
-    HttpGraphQlTester.create(webClient)
-      .document(query)
-      .execute()
+    doSubmitRequest(query)
       .errors()
       .satisfy { err ->
-        assertThat(err)
-          .extracting(ResponseError::getErrorType)
-          .contains(Tuple.tuple(ErrorType.DataFetchingException))
-
-        assertThat(
-          err.stream()
-            .map { it.message }
-            .collect(Collectors.toList())
-        ).containsExactlyInAnyOrder("Data not exists. Id: $randomId")
+        assertNotFound(err, randomId)
       }
   }
 
   fun doSubmitAndAssert(query: String, vararg tuples: Tuple) {
-    val resultList = doSubmitRequest(query)
+    val resultList = doSubmitRequestAndReturnList(query)
     assertThat(resultList)
       .extracting("name", "description")
       .containsExactlyInAnyOrder(*tuples)
   }
 
-  fun doSubmitRequest(query: String): MutableList<Category> =
-    HttpGraphQlTester.create(webClient)
-      .document(query)
-      .execute()
-      .path("categories")
+  fun doSubmitRequestAndReturnList(query: String): MutableList<Category> =
+    doSubmitRequestAndGetPath(query, "categories")
       .entityList(Category::class.java)
       .get()
 
+  fun doSubmitRequestAndGetPath(query: String, path: String) =
+    doSubmitRequest(query)
+      .path(path)
+
+  fun doSubmitRequest(query: String) =
+    HttpGraphQlTester.create(webClient)
+      .document(query)
+      .execute()
+
+  fun getBeverages() = repository.findAll().collectList().block()
+    ?.stream()
+    ?.sorted(Comparator.comparing { it.name })
+    ?.collect(Collectors.toList())
+    ?.get(0)
+
+  fun assertValidationError(
+    err: MutableList<ResponseError>,
+    vararg expectedErrorFields: Tuple
+  ) {
+    assertThat(err)
+      .extracting(ResponseError::getErrorType)
+      .contains(Tuple.tuple(ErrorType.ValidationError))
+
+    assertThat(
+      err.stream()
+        .map { it.extensions[VALIDATION_ERRORS] as List<*> }
+        .map { it.filterIsInstance<LinkedHashMap<String, String>>() }
+        .flatMap { it.stream() }
+        .map { objectMapper.convertValue(it, ValidationError::class.java) }
+        .collect(Collectors.toList())
+    ).extracting(ValidationError::field, ValidationError::message)
+      .containsExactlyInAnyOrder(*expectedErrorFields)
+  }
+
+  private fun assertNotFound(err: List<ResponseError>, randomId: String) {
+    assertThat(err)
+      .extracting(ResponseError::getErrorType)
+      .contains(Tuple.tuple(ErrorType.DataFetchingException))
+
+    assertThat(
+      err.stream()
+        .map { it.message }
+        .collect(Collectors.toList())
+    ).containsExactlyInAnyOrder("Data not exists. Id: $randomId")
+  }
 }

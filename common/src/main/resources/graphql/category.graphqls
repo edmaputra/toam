@@ -14,7 +14,14 @@ input CategoryInput {
     description: String
 }
 
+input CategoryUpdateInput {
+    id: String!,
+    name: String!,
+    description: String
+}
+
 type Mutation {
     createCategory(input: CategoryInput): Category
+    updateCategory(input: CategoryUpdateInput): Category
     deleteCategory(id: String!): Category
 }

@@ -13,13 +13,14 @@ import org.springframework.data.relational.core.query.isEqual
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.util.UUID
+import java.util.*
 
 
 interface CategoryTemplateRepository {
   fun findAll(page: Long?, size: Int?, sortBy: String?, isAsc: Boolean?, keyWords: String?): Flux<Category>
   fun findById(id: String): Mono<Category>
   fun save(category: Category): Mono<Category>
+  fun update(category: Category): Mono<Category>
   fun delete(id: String): Mono<Category>
 }
 
@@ -44,6 +45,8 @@ class CategoryTemplateRepositoryImpl(private val template: R2dbcEntityTemplate) 
       .switchIfEmpty(Mono.error { EntityNotFoundException(id) })
 
   override fun save(category: Category) = template.insert(category)
+
+  override fun update(category: Category) = template.update(category)
 
   override fun delete(id: String): Mono<Category> {
     return findById(id)
